@@ -15,10 +15,10 @@ end
 
 //Variáveis útei 
 m = 0 //Contador de ciclo
-velocidade = ''; //Variável que armazenará a velocidade & Futuramente posicao
+posicao = ''; //Variável que armazenará a velocidade & Futuramente posicao
 loop = 1 //Variável para manter o loop futuramente & Laço será mantido pela distância
 
-potencia = [150 200] // Potencia a ser enviada & Será velocidade 
+potencia = [10 200] // Potencia a ser enviada & Será velocidade 
 
 while loop == 1 then 
     tic()
@@ -32,16 +32,21 @@ end //end if q(1)
         m = m + 1;
         while ascii(recebido) ~= 3 then
             recebido = readserial(arduino_com, 1);
-            velocidade =  msprintf('%s%s',velocidade, recebido);
+            posicao =  msprintf('%s%s',posicao, recebido);
             
         end //while ~3
-        disp(velocidade)
+        cord = strtod(strsplit(posicao, ","))';
+        disp(cord);
         sleep(50);
-        potencia_str = strcat(string([potencia(1) potencia(2)]), ",");
+        potencia_str = strcat(string([potencia(1) potencia(1)]), ",");
         writeserial(arduino_com, potencia_str);
         disp("potencia enviada", potencia_str);
-        velocidade = "";
+        posicao = "";
+        if (potencia(1) <250) then
+        potencia(1) = potencia(1) + 10;
+        end 
         t = toc();
         disp(t);
         end // end if ==2   
 end // end loop
+disp("Finish");

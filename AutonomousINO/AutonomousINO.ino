@@ -1,7 +1,10 @@
 #include <PID_v1.h>
 #include <AFMotor.h>
 #include <stdlib.h>
+#include <LiquidCrystal_I2C.h>
 
+
+LiquidCrystal_I2C lcd(0x3F,16,2); 
 
 //---Controle de Velocidade
 
@@ -15,6 +18,14 @@ int s1D = 0, s1E = 0;          // Primeiros valores lidos pelo encoder
 
 unsigned long tvel = 50000; //Intervalo de amostragem do encoder
 unsigned long t0 =0, t =0; //marcador de inicio de tempo e variável de controle do tempo
+ //---Odometria
+double r=0.034; //raio em metros
+double l=0.147; //comprimento em metros
+double x0=0, y0 = 0, theta0 = 0; //posição inicial
+double x=0, y = 0, theta=0; //posição atual
+ 
+ 
+ 
  //---Comunicação
  String recebido = "";
  String out1_str = "";
@@ -28,18 +39,25 @@ void setup() {
   Serial.begin(115200);
   motorD.setSpeed(out1);
   motorE.setSpeed(out2);
+  lcd.init();
+  lcd.clear();
 }
 
 
 void loop() {
   motorD.run(FORWARD);
   motorE.run(FORWARD);
+  lcd.backlight();
   while (parar =1){
 
     Serial.write(2);
-    Serial.print(out1);Serial.print(",");
-    Serial.print(out2);
+    Serial.print(x);Serial.print(",");
+    Serial.print(y);Serial.print(",");
+    Serial.print(theta);
     Serial.write(3);
+
+    lcd.setCursor(0, 0);
+    lcd.print("Enviou");
 
     //envio 
     t0 = micros();
@@ -62,6 +80,15 @@ void loop() {
     velE = (countE * 65449.847) / (t*33.5);
     countD = 0; countE = 0;
 
+//Odometria 
+    x    = x0+r/2*t*cos(theta0)*(velD + velE)/1000000;
+    y    = y0+r/2*t*sin(theta0)*(velD + velE)/1000000;
+    theta = theta0+r/l*t*(velD - velE)/1000000;
+
+    x0 = x;
+    y0 = y;
+    theta0 = theta;
+
     //leitura
     if(Serial.available()>0){
       recebido = leStringSerial();
@@ -74,6 +101,9 @@ void loop() {
       motorD.setSpeed(out1); motorE.setSpeed(out2);
 
     }
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("LEU");
 
 
 
