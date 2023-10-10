@@ -18,7 +18,7 @@ m = 0 //Contador de ciclo
 posicao = ''; //Variável que armazenará a velocidade & Futuramente posicao
 loop = 1 //Variável para manter o loop futuramente & Laço será mantido pela distância
 
-potencia = [10 200] // Potencia a ser enviada & Será velocidade 
+velocidade = [3 3] // Potencia a ser enviada & Será velocidade 
 
 while loop == 1 then 
     tic()
@@ -38,12 +38,13 @@ end //end if q(1)
         cord = strtod(strsplit(posicao, ","))';
         disp(cord);
         sleep(50);
-        potencia_str = strcat(string([potencia(1) potencia(1)]), ",");
-        writeserial(arduino_com, potencia_str);
-        disp("potencia enviada", potencia_str);
+        velocidade_str = strcat(string([velocidade(1) velocidade(2)]), ",");
+        writeserial(arduino_com, velocidade_str);
+        disp("potencia enviada", velocidade_str);
         posicao = "";
-        if (potencia(1) <250) then
-        potencia(1) = potencia(1) + 10;
+        if (velocidade(1) <9) then
+        velocidade(1) = velocidade(1) + 0.10;
+        velocidade(2) = velocidade(2) + 0.10;
         end 
         t = toc();
         disp(t);

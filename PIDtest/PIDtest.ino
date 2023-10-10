@@ -25,8 +25,8 @@ unsigned long tserial = tRPI - tPID*constLoop;
 unsigned long esperaTot = 0, toldTot = 0;
 
 // -*- PID -*-
-double Kpe = 30.32, Kie = 667.93, Kde = 0;   // Ganhos da roda esquerda
-double Kpd = 25.64, Kid = 756, Kdd = 0;    // Ganhos da roda direita
+double Kpe = 3, Kie = 8.5, Kde = 0;   // Ganhos da roda esquerda
+double Kpd = 3, Kid = 8.3, Kdd = 0;   // Ganhos da roda direita
 double SetpointD = 0, InputD = 0, EsfControleD=0,  SetpointE = 0, InputE = 0, EsfControleE=0; //  Variaveis relacionadas ao PID
 double EsfControleD2 = 0, EsfControleE2 =0;
 
@@ -47,7 +47,7 @@ void setup() {
   
   // Parametros PID
   myPIDd.SetOutputLimits(-255, 255); myPIDe.SetOutputLimits(-255, 255);
-  myPIDd.SetSampleTime(tPID/1000); myPIDe.SetSampleTime(tPID/1000);
+  myPIDd.SetSampleTime(100); myPIDe.SetSampleTime(100);
   myPIDd.SetMode(AUTOMATIC); myPIDe.SetMode(AUTOMATIC);
   SetpointE = 0; SetpointD = 0;
   

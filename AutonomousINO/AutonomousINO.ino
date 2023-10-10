@@ -18,12 +18,23 @@ int s1D = 0, s1E = 0;          // Primeiros valores lidos pelo encoder
 
 unsigned long tvel = 50000; //Intervalo de amostragem do encoder
 unsigned long t0 =0, t =0; //marcador de inicio de tempo e variável de controle do tempo
+ 
  //---Odometria
 double r=0.034; //raio em metros
 double l=0.147; //comprimento em metros
 double x0=0, y0 = 0, theta0 = 0; //posição inicial
 double x=0, y = 0, theta=0; //posição atual
- 
+
+//---PID
+
+double Kpe = 3, Kie = 8.5, Kde = 0;   // Ganhos da roda esquerda
+double Kpd = 3, Kid = 8.3, Kdd = 0;   // Ganhos da roda direita
+
+double SetpointD = 0, InputD = 0, EsfControleD=0,  SetpointE = 0, InputE = 0, EsfControleE=0; //  Variaveis relacionadas ao PID
+
+PID myPIDe(&InputE, &EsfControleE, &SetpointE, Kpe, Kie, Kde, DIRECT); // Declaraçao do PID esquerdo
+PID myPIDd(&InputD, &EsfControleD, &SetpointD, Kpd, Kid, Kdd, DIRECT); // Declaraçao do PID direito
+
  
  
  //---Comunicação
@@ -37,10 +48,18 @@ int index=0;
 int parar = 1; //variável de saída de laço
 void setup() {
   Serial.begin(115200);
-  motorD.setSpeed(out1);
-  motorE.setSpeed(out2);
+  motorD.setSpeed(0);
+  motorE.setSpeed(0);
+
+
   lcd.init();
   lcd.clear();
+
+    // Parametros PID
+  myPIDd.SetOutputLimits(-255, 255); myPIDe.SetOutputLimits(-255, 255);
+  myPIDd.SetSampleTime(100); myPIDe.SetSampleTime(100);
+  myPIDd.SetMode(AUTOMATIC); myPIDe.SetMode(AUTOMATIC);
+  
 }
 
 
@@ -80,6 +99,14 @@ void loop() {
     velE = (countE * 65449.847) / (t*33.5);
     countD = 0; countE = 0;
 
+//PID
+    InputE = velE; InputD = velD;
+    SetpointE = out1; SetpointD = out2;
+
+    myPIDd.Compute(); myPIDe.Compute();
+
+    motorD.setSpeed(EsfControleD); motorE.setSpeed(EsfControleE);
+
 //Odometria 
     x    = x0+r/2*t*cos(theta0)*(velD + velE)/1000000;
     y    = y0+r/2*t*sin(theta0)*(velD + velE)/1000000;
@@ -98,7 +125,7 @@ void loop() {
 
       out1 = atof(out1_str.c_str());
       out2 = atof(out2_str.c_str());
-      motorD.setSpeed(out1); motorE.setSpeed(out2);
+    
 
     }
     lcd.clear();
