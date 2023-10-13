@@ -37,7 +37,7 @@ end //end if q(1)
         end //while ~3
         cord = strtod(strsplit(posicao, ","))';
         disp(cord);
-        sleep(50);
+        //sleep(50);
         velocidade_str = strcat(string([velocidade(1) velocidade(2)]), ",");
         writeserial(arduino_com, velocidade_str);
         disp("potencia enviada", velocidade_str);

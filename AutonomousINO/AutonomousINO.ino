@@ -18,6 +18,7 @@ int s1D = 0, s1E = 0;          // Primeiros valores lidos pelo encoder
 
 unsigned long tvel = 50000; //Intervalo de amostragem do encoder
 unsigned long t0 =0, t =0; //marcador de inicio de tempo e variável de controle do tempo
+unsigned long tOP = 0; // marca o tempo total de processamento 
  
  //---Odometria
 double r=0.034; //raio em metros
@@ -39,10 +40,10 @@ PID myPIDd(&InputD, &EsfControleD, &SetpointD, Kpd, Kid, Kdd, DIRECT); // Declar
  
  //---Comunicação
  String recebido = "";
- String out1_str = "";
- String out2_str = "";
-double out1 = 0;
-double out2 = 0;
+ String outD_str = "";
+ String outE_str = "";
+double outD = 0;
+double outE = 0;
 int index=0;
 
 int parar = 1; //variável de saída de laço
@@ -56,7 +57,7 @@ void setup() {
   lcd.clear();
 
     // Parametros PID
-  myPIDd.SetOutputLimits(-255, 255); myPIDe.SetOutputLimits(-255, 255);
+  myPIDd.SetOutputLimits(0, 255); myPIDe.SetOutputLimits(0, 255);
   myPIDd.SetSampleTime(100); myPIDe.SetSampleTime(100);
   myPIDd.SetMode(AUTOMATIC); myPIDe.SetMode(AUTOMATIC);
   
@@ -67,7 +68,7 @@ void loop() {
   motorD.run(FORWARD);
   motorE.run(FORWARD);
   lcd.backlight();
-  while (parar =1){
+  while (parar == 1){
 
     Serial.write(2);
     Serial.print(x);Serial.print(",");
@@ -77,7 +78,7 @@ void loop() {
 
     lcd.setCursor(0, 0);
     lcd.print("Enviou");
-
+    for (int i =0; i<5; i++){
     //envio 
     t0 = micros();
     t = micros()-t0;
@@ -100,12 +101,20 @@ void loop() {
     countD = 0; countE = 0;
 
 //PID
+
+
     InputE = velE; InputD = velD;
-    SetpointE = out1; SetpointD = out2;
+    SetpointE = outE; SetpointD = outD;
 
     myPIDd.Compute(); myPIDe.Compute();
 
     motorD.setSpeed(EsfControleD); motorE.setSpeed(EsfControleE);
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(outD);
+    lcd.setCursor(0,1);
+    lcd.print(parar);
 
 //Odometria 
     x    = x0+r/2*t*cos(theta0)*(velD + velE)/1000000;
@@ -115,16 +124,17 @@ void loop() {
     x0 = x;
     y0 = y;
     theta0 = theta;
-
+    tOP = micros() - t0;
+    }
     //leitura
     if(Serial.available()>0){
       recebido = leStringSerial();
       index = recebido.indexOf(',');
-      out1_str = recebido.substring(0, index);
-      out2_str = recebido.substring(index+1);
+      outD_str = recebido.substring(0, index);
+      outE_str = recebido.substring(index+1);
 
-      out1 = atof(out1_str.c_str());
-      out2 = atof(out2_str.c_str());
+      outD = atof(outD_str.c_str());
+      outE = atof(outE_str.c_str());
     
 
     }
@@ -135,6 +145,11 @@ void loop() {
 
 
   }
+    motorD.run(RELEASE);
+    motorE.run(RELEASE);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("FIM!");
 }
 
 
@@ -145,6 +160,10 @@ String leStringSerial(){
   while(Serial.available() > 0) {
     // Lê byte da serial
     caractere = Serial.read();
+    if (caractere == "$"){
+      parar = 2;
+      break; 
+    }
     // Ignora caractere de quebra de linha
     if (caractere != '\n'){
       // Concatena valores
