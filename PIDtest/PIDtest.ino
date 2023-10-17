@@ -32,7 +32,8 @@ double EsfControleD2 = 0, EsfControleE2 =0;
 
 double EsfMinOND = 120, EsfMinOFFD = 200,EsfMinONE =120, EsfMinOFFE =180, velMinD = 0.8, velMinE = 0.8; // Valores minimos para que o robo nao pare
 double fatorD = 1, fatorE = 1 ;
-
+int dirD=1;
+int dirE=1;
 PID myPIDe(&InputE, &EsfControleE, &SetpointE, Kpe, Kie, Kde, DIRECT); // Declaraçao do PID esquerdo
 PID myPIDd(&InputD, &EsfControleD, &SetpointD, Kpd, Kid, Kdd, DIRECT); // Declaraçao do PID direito
 
@@ -62,7 +63,7 @@ void loop() {
   SetpointE = 8;
   motorD.run(FORWARD);
   motorE.run(FORWARD);
-    while (para == 1){
+    while (para == 2){
 
     t0 = micros();
     treal = (micros() - t0);
@@ -80,8 +81,8 @@ void loop() {
       treal = (micros() - t0);
     }//while t < 5000
    
-   RadE =(contE * 65449.847) / (treal*33.5);
-   RadD =(contD * 65449.847) / (treal*33.5);
+   RadE =dirE*(contE * 65449.847) / (treal*33.5);
+   RadD =dirD*(contD * 65449.847) / (treal*33.5);
 
   contD = 0;
   contE = 0;
@@ -104,8 +105,26 @@ void loop() {
     //Serial.println("EsfControleD = "+String(EsfControleD));
     
      //Escreve nos motores
+
+     if (EsfControleD >= 0){
+       motorD.run(FORWARD);
+       dirD =1;
+     }
+     else{
+       motorD.run(BACKWARD);
+       dirD = -1;
+     }
+
+     if (EsfControleE >= 0){
+       motorE.run(FORWARD);
+       dirE = 1;
+     }
+     else{
+       motorE.run(BACKWARD);
+       dirE = -1;
+     }
     Serial.println(RadD);
-    motorD.setSpeed(EsfControleD); motorE.setSpeed(EsfControleE);
+    motorD.setSpeed(abs(EsfControleD)); motorE.setSpeed(abs(EsfControleE));
 }
 
 }

@@ -38,7 +38,7 @@ theta_pos = %pi/4;
 obst_pos_fix = [200,200];
 
 // Define os valores da posição do objetivo
-final_pos = [5,0]; 
+final_pos = [2,0]; 
 distancia = norm(robo_pos - final_pos);
                                                                                                                                                                                                                                                                 
 //Incia algumas variáveis
@@ -46,6 +46,8 @@ m =1;               // Qtd de mensagens recebidas
 posicao1 = '';      // Lido
 velocidade = [0 0];
 lixo = readserial(arduino_com);
+
+t=0;
 
 // writeserial(arduino_com, strcat(string([200 200]), ","));
 while distancia > 0.1 then
@@ -83,7 +85,7 @@ recebido = readserial(arduino_com, 1);
             disp(dados(m,:));
             
             robo_pos(m,:) = dados(m,1:2);
-            //plot(robo_pos(m,1), robo_pos(m,2))
+            plot(robo_pos(m,1), robo_pos(m,2), 'o')
             theta_pos(m) = dados(m,3);
             
             obst_pos =[];
@@ -97,7 +99,9 @@ recebido = readserial(arduino_com, 1);
             vel_string(m) = strcat(string([velocidade(m,1) velocidade(m,2)]), ",");
             t = toc();
             disp("Tempo", t);
-            sleep(250-(t*100));
+            if t < 0.5 then 
+            sleep(500-(t*1000));
+            end
             //Envia as velocidades desejadas para o Arduino
             writeserial(arduino_com, vel_string(m)); 
             posicao1 = "";

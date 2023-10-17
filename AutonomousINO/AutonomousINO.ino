@@ -25,7 +25,7 @@ double r=0.034; //raio em metros
 double l=0.147; //comprimento em metros
 double x0=0, y0 = 0, theta0 = 0; //posição inicial
 double x=0, y = 0, theta=0; //posição atual
-
+int dirE=1, dirD=1; //variáveis de direção 
 //---PID
 
 double Kpe = 3, Kie = 8.5, Kde = 0;   // Ganhos da roda esquerda
@@ -57,7 +57,7 @@ void setup() {
   lcd.clear();
 
     // Parametros PID
-  myPIDd.SetOutputLimits(0, 255); myPIDe.SetOutputLimits(0, 255);
+  myPIDd.SetOutputLimits(-255, 255); myPIDe.SetOutputLimits(-255, 255);
   myPIDd.SetSampleTime(100); myPIDe.SetSampleTime(100);
   myPIDd.SetMode(AUTOMATIC); myPIDe.SetMode(AUTOMATIC);
   
@@ -78,7 +78,7 @@ void loop() {
 
     lcd.setCursor(0, 0);
     lcd.print("Enviou");
-    for (int i =0; i<5; i++){
+    for (int i =0; i<10; i++){
     //envio 
     t0 = micros();
     t = micros()-t0;
@@ -107,14 +107,32 @@ void loop() {
     SetpointE = outE; SetpointD = outD;
 
     myPIDd.Compute(); myPIDe.Compute();
+    //Controle de Direção
+    if (EsfControleD >= 0){
+      motorD.run(FORWARD);
+      dirD =1;
+    }
+    else{
+      motorD.run(BACKWARD);
+      dirD = -1;
+     }
 
-    motorD.setSpeed(EsfControleD); motorE.setSpeed(EsfControleE);
+    if (EsfControleE >= 0){
+      motorE.run(FORWARD);
+      dirE = 1;
+    }
+    else{
+      motorE.run(BACKWARD);
+      dirE = -1;
+    }
+
+    motorD.setSpeed(abs(EsfControleD)); motorE.setSpeed(abs(EsfControleE));
 
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print(outD);
+    lcd.print(EsfControleD);
     lcd.setCursor(0,1);
-    lcd.print(parar);
+    lcd.print(EsfControleE);
 
 //Odometria 
     x    = x0+r/2*t*cos(theta0)*(velD + velE)/1000000;
@@ -130,6 +148,9 @@ void loop() {
     if(Serial.available()>0){
       recebido = leStringSerial();
       index = recebido.indexOf(',');
+      if(index < 1){
+        parar = 2;
+      }
       outD_str = recebido.substring(0, index);
       outE_str = recebido.substring(index+1);
 
@@ -160,10 +181,6 @@ String leStringSerial(){
   while(Serial.available() > 0) {
     // Lê byte da serial
     caractere = Serial.read();
-    if (caractere == "$"){
-      parar = 2;
-      break; 
-    }
     // Ignora caractere de quebra de linha
     if (caractere != '\n'){
       // Concatena valores
