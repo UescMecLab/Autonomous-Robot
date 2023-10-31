@@ -60,10 +60,10 @@ void setup() {
 void loop() {
 
   SetpointD = 8;
-  SetpointE = 8;
+  SetpointE = 0;
   motorD.run(FORWARD);
   motorE.run(FORWARD);
-    while (para == 2){
+    while (para == 0){
 
     t0 = micros();
     treal = (micros() - t0);

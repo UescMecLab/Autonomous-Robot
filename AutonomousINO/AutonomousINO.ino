@@ -25,6 +25,7 @@ double r=0.034; //raio em metros
 double l=0.147; //comprimento em metros
 double x0=0, y0 = 0, theta0 = 0; //posição inicial
 double x=0, y = 0, theta=0; //posição atual
+double x_est=0, y_est=0, theta_est=0; //posição estimada
 int dirE=1, dirD=1; //variáveis de direção 
 //---PID
 
@@ -65,10 +66,18 @@ void setup() {
 
 
 void loop() {
-  motorD.run(FORWARD);
-  motorE.run(FORWARD);
+  //motorD.run(FORWARD);
+  //motorE.run(FORWARD);
   lcd.backlight();
   while (parar == 1){
+
+    //Posição estimada:
+
+    x_est     = x0+r/2*(10*tvel)*cos(theta0)*(outD + outE)/1000000; // Divide por um milhao para transformar o periodo em s
+    y_est     = y0+r/2*(10*tvel)*sin(theta0)*(outD + outE)/1000000;
+    theta_est = theta0+r/l*(10*tvel)*(outD - outE)/1000000;
+
+
 
     Serial.write(2);
     Serial.print(x);Serial.print(",");
@@ -96,8 +105,8 @@ void loop() {
       t = micros() - t0;
 
     }// while tvel
-    velD = (countD * 65449.847) / (t*33.5);
-    velE = (countE * 65449.847) / (t*33.5);
+    velD = dirD*(countD * 65449.847) / (t*33.5);
+    velE = dirE*(countE * 65449.847) / (t*33.5);
     countD = 0; countE = 0;
 
 //PID
@@ -130,9 +139,9 @@ void loop() {
 
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print(EsfControleD);
+    lcd.print(velD);
     lcd.setCursor(0,1);
-    lcd.print(EsfControleE);
+    lcd.print(velE);
 
 //Odometria 
     x    = x0+r/2*t*cos(theta0)*(velD + velE)/1000000;
@@ -148,14 +157,15 @@ void loop() {
     if(Serial.available()>0){
       recebido = leStringSerial();
       index = recebido.indexOf(',');
-      if(index < 1){
-        parar = 2;
-      }
       outD_str = recebido.substring(0, index);
       outE_str = recebido.substring(index+1);
 
       outD = atof(outD_str.c_str());
       outE = atof(outE_str.c_str());
+      if (outD ==0 && outE ==0){
+        parar = 2;
+        break;
+      }
     
 
     }
@@ -168,6 +178,8 @@ void loop() {
   }
     motorD.run(RELEASE);
     motorE.run(RELEASE);
+    motorD.setSpeed(0);
+    motorE.setSpeed(0);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("FIM!");

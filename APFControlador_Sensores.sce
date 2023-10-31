@@ -35,11 +35,18 @@ theta_pos = %pi/4;
 
 // Define os valores da posição do obstáculo
 // Note que futuramente isso será definido pelos sensores de Berguem
-obst_pos_fix = [200,200];
+//obst_pos_fix = [0.73,2.14; 1.48, 1.44; 2.14, 0.73];
+obst_pos_fix = [200, 200];
 
 // Define os valores da posição do objetivo
-final_pos = [2,0]; 
+final_pos = [-2,2]; 
 distancia = norm(robo_pos - final_pos);
+plot(final_pos(1), final_pos(2), 'gx-', 'LineWidth', 2);
+//plot(obst_pos_fix(1,1), obst_pos_fix(1,2), 'rx-', 'LineWidth', 2);
+//plot(obst_pos_fix(2,1), obst_pos_fix(2,2), 'rx-', 'LineWidth', 2);
+//plot(obst_pos_fix(3,1), obst_pos_fix(3,2), 'rx-', 'LineWidth', 2);
+
+
                                                                                                                                                                                                                                                                 
 //Incia algumas variáveis
 m =1;               // Qtd de mensagens recebidas
@@ -106,18 +113,18 @@ recebido = readserial(arduino_com, 1);
             writeserial(arduino_com, vel_string(m)); 
             posicao1 = "";
             distancia = norm(robo_pos(m,:) - final_pos);
-            disp("D = ", distancia);
-            //sleep(1000); // 500 resolve o problema do reset e não atropela
+            disp("Distância = ", distancia);
+            
     end // if ascii(recebido)== 2 then
     
  t = toc();
 //disp(t);    
  end // distancia > 0.01 then
       
-     writeserial(arduino_com, "$"); 
+    
      velocidade(m,:) = [0, 0];      
      vel_string(m) = strcat(string([velocidade(m,1)]), ",");
-            
+      sleep(500)
      //Envia as velocidades desejadas para o Arduino
      writeserial(arduino_com, vel_string(m)); 
      disp('Ok!')
