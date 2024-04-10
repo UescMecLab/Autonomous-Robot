@@ -7,11 +7,11 @@
 
 format(5);
 // Abre o diretorio
-getd('C:\Users\João Vitor\Desktop\UESC\IC\KamiliaCode');
+getd('C:\Users\João Vitor\Desktop\UESC\IC\Autonomous-Robot\FunctionSCI');
 
 
 // Carrega os parametros
-exec('C:\Users\João Vitor\Desktop\UESC\IC\KamiliaCode\parametros_apf.sci', -1);
+exec('C:\Users\João Vitor\Desktop\UESC\IC\Autonomous-Robot\FunctionSCI\parametros_apf.sci', -1);
 
 //Inicia a comunicação com o arduino
 arduino_com = openserial("COM3","115200,n,8,1") // para Windows
@@ -31,21 +31,24 @@ qtde_character = 20; // Verificar quantos serão necessários.
 // Define os valores da posição x,y inicial do robô e o angulo
 // Note que futuramente isso será definido pelos sensores Bluetooth
 robo_pos = [0,0];
-theta_pos = %pi/4;
+theta_pos = %pi;
+
 
 // Define os valores da posição do obstáculo
 // Note que futuramente isso será definido pelos sensores de Berguem
+//obst_pos_fix = [0.73,2.14; 1.48, 1.44];
 //obst_pos_fix = [0.73,2.14; 1.48, 1.44; 2.14, 0.73];
 obst_pos_fix = [200, 200];
 
 // Define os valores da posição do objetivo
-final_pos = [-2,2]; 
+final_pos = [3,3]; 
 distancia = norm(robo_pos - final_pos);
 plot(final_pos(1), final_pos(2), 'gx-', 'LineWidth', 2);
-//plot(obst_pos_fix(1,1), obst_pos_fix(1,2), 'rx-', 'LineWidth', 2);
-//plot(obst_pos_fix(2,1), obst_pos_fix(2,2), 'rx-', 'LineWidth', 2);
-//plot(obst_pos_fix(3,1), obst_pos_fix(3,2), 'rx-', 'LineWidth', 2);
-
+/*
+plot(obst_pos_fix(1,1), obst_pos_fix(1,2), 'rx-', 'LineWidth', 2);
+plot(obst_pos_fix(2,1), obst_pos_fix(2,2), 'rx-', 'LineWidth', 2);
+plot(obst_pos_fix(3,1), obst_pos_fix(3,2), 'rx-', 'LineWidth', 2);
+*/
 
                                                                                                                                                                                                                                                                 
 //Incia algumas variáveis
@@ -55,7 +58,7 @@ velocidade = [0 0];
 lixo = readserial(arduino_com);
 
 t=0;
-
+tempo(1,:)=0;
 // writeserial(arduino_com, strcat(string([200 200]), ","));
 while distancia > 0.1 then
 //                                                                                        while arduino_com ~= -1 
@@ -98,13 +101,14 @@ recebido = readserial(arduino_com, 1);
             obst_pos =[];
             //obst_pos = [obst_pos_fix; obs_mov];
             // Calcula o próximo ponto utilizando APF
-            forca_tot(m,:) = APF (robo_pos(m,:), final_pos, obst_pos_fix, a_max, etta, xi, ro_o, a_min);
+            forca_tot(m,:) = APF (robo_pos(m,:), final_pos, obst_pos_fix, a_max, etta, xi, ro_o, precisao, a_min);
         
             // Calcula as velocidades em cada roda a partir da força total
             velocidade(m, :) = controlador(forca_tot(m,:),theta_pos(m),kr,kl); // [u1 u2]
             disp("velocidade", velocidade(m,:));
             vel_string(m) = strcat(string([velocidade(m,1) velocidade(m,2)]), ",");
             t = toc();
+            tempo(m,:) = tempo(m-1,:)+t
             disp("Tempo", t);
             if t < 0.5 then 
             sleep(500-(t*1000));
@@ -157,3 +161,9 @@ recebido = readserial(arduino_com, 1);
      disp('Ok!')
             
 closeserial(arduino_com)
+
+
+ arquivo = dados;
+ arquivo(:,4:5) = velocidade;
+ arquivo(:,6) = tempo;
+ csvWrite(arquivo, "reta2.2");

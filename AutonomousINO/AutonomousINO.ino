@@ -8,8 +8,8 @@ LiquidCrystal_I2C lcd(0x3F,16,2);
 
 //---Controle de Velocidade
 
-AF_DCMotor motorD(2);             //Seleciona o motor direito na porta 2
-AF_DCMotor motorE(1);             //Seleciona o motor esquerdo na porta 1
+AF_DCMotor motorD(1);             //Seleciona o motor direito na porta 2
+AF_DCMotor motorE(2);             //Seleciona o motor esquerdo na porta 1
 
 int ps2D = 32, ps2E = 33;         //Pinos do Arduino conectados ao encoder
 int countE = 0, countD = 0;
@@ -22,15 +22,15 @@ unsigned long tOP = 0; // marca o tempo total de processamento
  
  //---Odometria
 double r=0.034; //raio em metros
-double l=0.147; //comprimento em metros
-double x0=0, y0 = 0, theta0 = 0; //posição inicial
+double l=0.097; //comprimento em metros
+double x0=0, y0 = 0, theta0 = 3.14/2; //posição inicial
 double x=0, y = 0, theta=0; //posição atual
 double x_est=0, y_est=0, theta_est=0; //posição estimada
 int dirE=1, dirD=1; //variáveis de direção 
 //---PID
 
-double Kpe = 3, Kie = 8.5, Kde = 0;   // Ganhos da roda esquerda
-double Kpd = 3, Kid = 8.3, Kdd = 0;   // Ganhos da roda direita
+double Kpe = 15, Kie = 50, Kde = 0;   // Ganhos da roda esquerda
+double Kpd = 10, Kid = 50, Kdd = 0;   // Ganhos da roda direita
 
 double SetpointD = 0, InputD = 0, EsfControleD=0,  SetpointE = 0, InputE = 0, EsfControleE=0; //  Variaveis relacionadas ao PID
 
@@ -52,6 +52,8 @@ void setup() {
   Serial.begin(115200);
   motorD.setSpeed(0);
   motorE.setSpeed(0);
+  pinMode(ps2D, INPUT);
+  pinMode(ps2E, INPUT);
 
 
   lcd.init();

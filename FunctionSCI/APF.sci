@@ -13,7 +13,7 @@ function [F_t] = APF(x_current, q_g, q_obs, a_max, etta, xi, ro_o, precisao,a_mi
             end
         
         end
-         c =1;
+        
 //        F_at = - xi * (x_current-q_g); // força atrativa
         F_at = - xi * (x_current-q_g)/norm(x_current-q_g); // força atrativa
         // Força  repulsiva
@@ -30,14 +30,35 @@ function [F_t] = APF(x_current, q_g, q_obs, a_max, etta, xi, ro_o, precisao,a_mi
         end
    
        betha = cos(atan(F_at(2), F_at(1)) - atan(F_rep(2), F_rep(1)));
-        sig = sign(sin(atan(F_at(2), F_at(1)) - atan(q_g(2)-q_obs(c,2), q_g(1)-q_obs(c,1)))); // sinal do sentido de giro da força de vórtex    
+      
+       if betha > 0 then
+           F_t = F_at + F_rep
+       else
+           /*
+           F_d = norm(x_current - q_obs(1,:));
+           D=1;
+        for i =1:c
+            if norm(x_current - q_obs(i,:)) < F_d then
+                D =i
+                F_d = norm(x_current - q_obs(i,:));
+            end
+        end
+        
+        sig = sign(sin(atan(F_at(2), F_at(1)) - atan(q_g(2)-q_obs(D,2), q_g(1)-q_obs(D,1)))); // sinal do sentido de giro da força de vórtex    
         F_v=sig*([-F_rep(2), F_rep(1)]); // força de vórtex
+        */
+        F_v = [0, 0];
+        for i = 1:c
+            sig = sign(sin(atan(F_at(2), F_at(1)) - atan(q_g(2)-q_obs(i,2), q_g(1)-q_obs(i,1))));
+            F_v= F_v + sig*([-F_rep(2), F_rep(1)]);
+        end
         
-        if betha > 0 then
-            sig = 0;
-        end   
+        F_t = F_at + F_v
         
-        F_t = F_at + F_v; // força total
+           
+       end
+        
+        
         if norm(F_t)>a_max then // force control
             F_t = (F_t/norm(F_t))*a_max;
         end
