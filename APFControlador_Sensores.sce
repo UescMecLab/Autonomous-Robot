@@ -33,6 +33,10 @@ qtde_character = 20; // Verificar quantos serão necessários.
 robo_pos = [0,0];
 theta_pos = %pi;
 
+vect_goal = [1.3,1.3;
+             0,1.3;
+             0,0];
+             
 
 // Define os valores da posição do obstáculo
 // Note que futuramente isso será definido pelos sensores de Berguem
@@ -41,14 +45,14 @@ theta_pos = %pi;
 obst_pos_fix = [200, 200];
 
 // Define os valores da posição do objetivo
-final_pos = [3,3]; 
-distancia = norm(robo_pos - final_pos);
-plot(final_pos(1), final_pos(2), 'gx-', 'LineWidth', 2);
-/*
-plot(obst_pos_fix(1,1), obst_pos_fix(1,2), 'rx-', 'LineWidth', 2);
-plot(obst_pos_fix(2,1), obst_pos_fix(2,2), 'rx-', 'LineWidth', 2);
-plot(obst_pos_fix(3,1), obst_pos_fix(3,2), 'rx-', 'LineWidth', 2);
-*/
+//final_pos = [1.4,1.8]; 
+//distancia = norm(robo_pos - final_pos);
+//plot(final_pos(1), final_pos(2), 'gx-', 'LineWidth', 2);
+
+//plot(obst_pos_fix(1,1), obst_pos_fix(1,2), 'rx-', 'LineWidth', 2);
+//plot(obst_pos_fix(2,1), obst_pos_fix(2,2), 'rx-', 'LineWidth', 2);
+//plot(obst_pos_fix(3,1), obst_pos_fix(3,2), 'rx-', 'LineWidth', 2);
+
 
                                                                                                                                                                                                                                                                 
 //Incia algumas variáveis
@@ -59,6 +63,15 @@ lixo = readserial(arduino_com);
 
 t=0;
 tempo(1,:)=0;
+
+g = 1
+while g <= size(vect_goal,1);
+
+final_pos = vect_goal(g,:); 
+distancia = norm(robo_pos(m,:) - final_pos);
+plot(final_pos(1), final_pos(2), 'gx-', 'LineWidth', 2);
+
+
 // writeserial(arduino_com, strcat(string([200 200]), ","));
 while distancia > 0.1 then
 //                                                                                        while arduino_com ~= -1 
@@ -124,7 +137,9 @@ recebido = readserial(arduino_com, 1);
  t = toc();
 //disp(t);    
  end // distancia > 0.01 then
-      
+ g = g +1;   
+end // g >= size
+
     
      velocidade(m,:) = [0, 0];      
      vel_string(m) = strcat(string([velocidade(m,1)]), ",");

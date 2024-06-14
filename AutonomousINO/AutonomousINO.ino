@@ -11,7 +11,7 @@ LiquidCrystal_I2C lcd(0x3F,16,2);
 AF_DCMotor motorD(1);             //Seleciona o motor direito na porta 2
 AF_DCMotor motorE(2);             //Seleciona o motor esquerdo na porta 1
 
-int ps2D = 32, ps2E = 33;         //Pinos do Arduino conectados ao encoder
+int ps2D = 30, ps2E = 31;         //Pinos do Arduino conectados ao encoder
 int countE = 0, countD = 0;
 double velD = 0, velE = 0; // Velocidade em rad/s
 int s1D = 0, s1E = 0;          // Primeiros valores lidos pelo encoder
@@ -29,8 +29,8 @@ double x_est=0, y_est=0, theta_est=0; //posição estimada
 int dirE=1, dirD=1; //variáveis de direção 
 //---PID
 
-double Kpe = 15, Kie = 50, Kde = 0;   // Ganhos da roda esquerda
-double Kpd = 10, Kid = 50, Kdd = 0;   // Ganhos da roda direita
+double Kpe = 9.5, Kie = 60, Kde = 0;   // Ganhos da roda esquerda
+double Kpd = 5, Kid = 55, Kdd = 0;   // Ganhos da roda direita
 
 double SetpointD = 0, InputD = 0, EsfControleD=0,  SetpointE = 0, InputE = 0, EsfControleE=0; //  Variaveis relacionadas ao PID
 

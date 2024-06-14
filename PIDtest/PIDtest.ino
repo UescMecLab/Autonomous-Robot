@@ -9,7 +9,7 @@ AF_DCMotor motorD(1);             //Seleciona o motor direito na porta 1
 AF_DCMotor motorE(2);             //Seleciona o motor esquerdo na porta 2
 
 
-int SGD = 32, SGE = 33;         //Pinos do Arduino conectados ao encoder
+int SGD = 30, SGE = 31;         //Pinos do Arduino conectados ao encoder
 int contE = 0, contD = 0;
 double RadD = 0, RadE = 0; // Velocidade em rad/s
 int RD1 = 0, RE1 = 0;         // Primeiros valores lidos pelo encoder
@@ -25,8 +25,8 @@ unsigned long tserial = tRPI - tPID*constLoop;
 unsigned long esperaTot = 0, toldTot = 0;
 
 // -*- PID -*-
-double Kpe = 15, Kie = 50, Kde = 0;   // Ganhos da roda esquerda
-double Kpd = 10, Kid = 50, Kdd = 0;   // Ganhos da roda direita 3 e 8.3
+double Kpe = 9.5, Kie = 60, Kde = 0;   // Ganhos da roda esquerda 9.5 e 60
+double Kpd = 5, Kid = 55, Kdd = 0;   // Ganhos da roda direita 3 e 8.3
 double SetpointD = 0, InputD = 0, EsfControleD=0,  SetpointE = 0, InputE = 0, EsfControleE=0; //  Variaveis relacionadas ao PID
 double EsfControleD2 = 0, EsfControleE2 =0;
 
@@ -39,8 +39,10 @@ PID myPIDd(&InputD, &EsfControleD, &SetpointD, Kpd, Kid, Kdd, DIRECT); // Declar
 
 
 int para = 1;
+int j =0;
+
 void setup() {
-   Serial.begin(9600);
+   Serial.begin(115200);
    //Serial.setTimeout(20000);
 
   pinMode(SGD, INPUT);
@@ -62,10 +64,14 @@ void setup() {
 
 void loop() {
 
+  while (Serial.available() > 0) {
+    Serial.read(); // Lê e descarta os dados do buffer
+}
+
   while (para == 0){
 
-  SetpointD = 5;
-  SetpointE = 5;
+  SetpointD = 2;
+  SetpointE = 2;
   motorD.run(FORWARD);
   motorE.run(FORWARD);
 
@@ -88,7 +94,14 @@ void loop() {
    
    RadE =dirE*(contE * 65449.847) / (treal*31.5);
    RadD =dirD*(contD * 65449.847) / (treal*31.5);
-  Serial.println(RadE);
+  j = j+1;
+   Serial.println(RadD-RadE);
+if (j>45){
+  motorD.run(RELEASE);
+  motorE.run(RELEASE);
+  para = 0;
+
+}
   contD = 0;
   contE = 0;
 
@@ -127,7 +140,8 @@ void loop() {
        motorE.run(BACKWARD);
        dirE = -1;
      }
-    motorD.setSpeed(abs(EsfControleD)); motorE.setSpeed(abs(EsfControleE));
+    motorD.setSpeed(abs(EsfControleD)); motorE.setSpeed(abs(EsfControleE)); 
+
 }
 
 }
