@@ -1,6 +1,6 @@
 clear;
 cd 'C:\Users\João Vitor\Desktop\UESC\IC\Autonomous-Robot\Otimização\Dados'
-dados = csvread('retax.csv');
+dados = csvread('diagonal.csv');
 posicao = dados(:,1:3);
 setpoint = dados(:,4:5);
 U = setpoint';
@@ -22,7 +22,7 @@ H =info(1, 3:end);
 sim = zeros(size(tempo, 2)-1,2);
 tic();
 for i = 1:size(tempo, 2)-1
-    [~, Xs] = ode45(@(t, X) Modelo_NoLinear2(t, X, U(:, i), H), [tempo(i), tempo(i)+0.5], X);
+    [~, Xs] = ode45(@(t, X) Modelo_NoLinear2(t, X, U(:, i), H), [tempo(i), tempo(i+1)], X);
     X = Xs(end, :)'; % Atualiza as condições iniciais para a próxima iteração
     sim(i, 1:2) = X(1:2)';
 end
