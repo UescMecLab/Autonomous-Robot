@@ -1,0 +1,14 @@
+function sim = Integracao(H, tempo, U, X)
+X0 = zeros(7,1);
+
+N = size(tempo,2);
+sim = zeros(N-1,2);
+
+for i = 1:size(tempo, 2)-1
+    if t
+    [~, Xs] = ode45(@(t, X) Modelo_NoLinear2(t, X, U(:, i), H), [tempo(i), tempo(i+1)], X);
+    X = Xs(end, :)'; % Atualiza as condições iniciais para a próxima iteração
+    sim(i, 1:2) = X(1:2)';
+end
+
+end
